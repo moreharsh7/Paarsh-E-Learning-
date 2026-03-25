@@ -1,0 +1,308 @@
+<!-- ================= SYLLABUS OVERVIEW ================= -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Manage Lectures</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-[#f4f6f9]">
+
+  <%- include('../partials/header.ejs') %>
+
+    <div class="flex min-h-screen">
+
+      <!-- Sidebar -->
+      <%- include('../partials/sidebar.ejs') %>
+
+        <!-- Main Content -->
+        <div class="flex-1 p-6">
+
+          <div class="bg-white rounded-xl shadow-sm mb-8">
+
+            <!-- Header -->
+            <div class="px-6 py-4 border-b space-y-2">
+
+              <!-- Top row: Back + Title -->
+              <div class="flex items-center justify-between">
+
+                <h3 class="text-lg font-bold">Course Syllabus</h3>
+
+                <button onclick="goBackToCourseManagement()" class="px-3 py-1.5 border border-gray-300 rounded-md text-sm
+           text-gray-700 hover:bg-gray-100 transition">
+                  ← Back
+                </button>
+
+              </div>
+
+              <!-- Subtitle -->
+              <p class="text-sm text-gray-500">
+                Module-wise structure with topics, assignments and tests
+              </p>
+
+              <!-- Action -->
+              <button class="mt-2 px-4 py-2 bg-green-600 text-white rounded" onclick="openAddModuleForm()">
+                + Add Module
+              </button>
+
+            </div>
+
+
+            <!-- Syllabus Content -->
+            <div class="p-6 space-y-6">
+              <% syllabus.forEach(module=> { %>
+
+                <!-- MODULE -->
+                <div class="border rounded-lg overflow-visible">
+
+                  <div class="px-4 py-3 bg-gray-100 flex items-center justify-between">
+                    <div class="font-semibold">
+                      <button class="text-sm" onclick="toggleModule('<%= module._id %>')"
+                        id="toggle-icon-<%= module._id %>">
+                        ⬇️
+                      </button>
+                      📦 <%= module.moduleTitle %>
+                    </div>
+
+                    <div class="relative">
+                      <button class="text-xs px-3 py-1 bg-green-600 text-white rounded"
+                        onclick="toggleAddItemMenu('<%= module._id %>')">
+                        + Add Item ▾
+                      </button>
+                      <button class="text-xs px-3 py-1 bg-red-600 text-white rounded"
+                        onclick="deleteModule('<%= module._id %>')">
+                        🗑 Delete Module
+                      </button>
+
+                      <div id="addItemMenu-<%= module._id %>"
+                        class="hidden absolute right-0 mt-2 w-40 bg-white border rounded shadow z-50">
+                        <div class="flex justify-end px-2 pt-1">
+                          <button class="text-gray-500 hover:text-red-600 text-sm"
+                            onclick="toggleAddItemMenu('<%= module._id %>')">
+                            ✕
+                          </button>
+                        </div>
+                        <button class="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                          onclick="openAddItemForm('<%= module._id %>', 'topic')">
+                          📘 Topic
+                        </button>
+
+                        <button class="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                          onclick="openAddItemForm('<%= module._id %>', 'assignment')">
+                          📝 Assignment
+                        </button>
+
+                        <button class="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                          onclick="openAddItemForm('<%= module._id %>', 'test')">
+                          🧪 Test
+                        </button>
+                      </div>
+                    </div>
+
+                  </div>
+
+
+                  <div id="module-body-<%= module._id %>" class="p-4 space-y-3 transition-all duration-300 hidden">
+                    <% module.items .sort((a, b)=> a.order - b.order)
+                      .forEach(item => { %>
+
+                      <!-- ITEM -->
+                      <div class="pl-3 border-l-4
+            <%= item.itemType === 'topic'
+                ? 'border-blue-500'
+                : item.itemType === 'assignment'
+                ? 'border-yellow-500'
+                : 'border-purple-500' %>">
+
+                        <!-- Title Row -->
+                        <div class="flex items-center justify-between font-medium">
+
+                          <div class="flex items-center gap-2">
+                            <% if (item.itemType==='topic' ) { %> 📘 <% } %>
+                                <% if (item.itemType==='assignment' ) { %> 📝 <% } %>
+                                    <% if (item.itemType==='test' ) { %> 🧪 <% } %>
+
+                                        <span class="capitalize">
+                                          <%= item.itemType %>:
+                                        </span>
+                                        <span>
+                                          <%= item.title %>
+                                        </span>
+                          </div>
+
+                          <!-- Action Buttons -->
+                          <div class="flex gap-2">
+
+                            <!-- COMMON ADD ACTIONS -->
+                            <% if (item.itemType==='topic' ) { %>
+                              <button class="text-xs px-2 py-1 bg-blue-600 text-white rounded"
+                                onclick="openLectureForm('<%= item._id %>', '<%= item.title %>')">
+                                + Lecture
+                              </button>
+                              <% } %>
+
+                                <% if (item.itemType==='assignment' ) { %>
+                                  <button class="text-xs px-3 py-1 bg-yellow-600 text-white rounded"
+                                    onclick="openAssignmentForm('<%= item._id %>', '<%= item.title %>')">
+                                    + Assignment
+                                  </button>
+                                  <% } %>
+
+                                    <% if (item.itemType==='test' ) { %>
+                                      <button class="text-xs px-3 py-1 bg-purple-600 text-white rounded"
+                                        onclick="openTestForm('<%= item._id %>', '<%= item.title %>')">
+                                        + Test
+                                      </button>
+                                      <% } %>
+
+                                        <!-- COMMON EDIT -->
+                                        <button class="text-xs px-2 py-1 bg-yellow-500 text-white rounded"
+                                          onclick="openEditItemForm('<%= item._id %>', '<%= item.itemType %>', '<%= item.title %>')">
+                                          ✏ Edit
+                                        </button>
+
+                                        <!-- COMMON DELETE -->
+                                        <button class="text-xs px-2 py-1 bg-red-600 text-white rounded"
+                                          onclick="deleteItem('<%= item._id %>', '<%= item.itemType %>')">
+                                          🗑 Delete
+                                        </button>
+
+                          </div>
+                        </div>
+
+                        <!-- Lectures under Topic -->
+                        <% if (item.itemType==='topic' ) { %>
+                          <div class="ml-6 mt-2 space-y-1 text-sm text-gray-700">
+                            <% const topicLectures=lectures.filter( l=> String(l.syllabusItemId) === String(item._id)
+                              );
+                              %>
+
+                              <% if (topicLectures.length===0) { %>
+                                <div class="italic text-gray-400">
+                                  No lectures added yet
+                                </div>
+                                <% } else { %>
+                                  <ul class="list-disc ml-5 space-y-1">
+                                    <% topicLectures.forEach(lec=> { %>
+                                      <li>
+                                        <button type="button" class="text-blue-600 hover:underline lecture-btn"
+                                          data-video="<%= lec.videoUrl %>">
+                                          ▶ <%= lec.lectureTitle %>
+                                        </button>
+                                      </li>
+
+                                      <% }) %>
+                                  </ul>
+                                  <% } %>
+                          </div>
+                          <% } %>
+                            <!-- Assignments under Assignment -->
+                            <% if (item.itemType==='assignment' ) { %>
+                              <div class="ml-6 mt-2 space-y-1 text-sm text-gray-700">
+                                <% const itemAssignments=assignments.filter( a=> String(a.syllabusItemId) ===
+                                  String(item._id)
+                                  );
+                                  %>
+
+                                  <% if (itemAssignments.length===0) { %>
+                                    <div class="italic text-gray-400">
+                                      No assignments added yet
+                                    </div>
+                                    <% } else { %>
+                                      <ul class="list-disc ml-5 space-y-1">
+                                        <% itemAssignments.forEach(a=> { %>
+                                          <li>
+                                            <button type="button" class="text-blue-600 hover:underline assignment-btn"
+                                              data-id="<%= a._id %>" data-title="<%- a.title %>"
+                                              data-description="<%= encodeURIComponent(a.description || '') %>"
+                                              data-file="<%= a.attachment || '' %>" data-marks="<%= a.maxMarks %>">
+                                              📄 <%= a.title %>
+                                            </button>
+
+                                            <span class="text-xs text-gray-500">
+                                              (Max: <%= a.maxMarks %>)
+                                            </span>
+                                          </li>
+                                          <% }) %>
+                                      </ul>
+                                      <% } %>
+                              </div>
+                              <% } %>
+                                <!-- Tests under Test -->
+                                <% if (item.itemType==='test' ) { %>
+                                  <div class="ml-6 mt-2 space-y-1 text-sm text-gray-700">
+                                    <% const itemTests=tests.filter( t=> String(t.syllabusItemId) === String(item._id)
+                                      );
+                                      %>
+
+                                      <% if (itemTests.length===0) { %>
+                                        <div class="italic text-gray-400">
+                                          No tests added yet
+                                        </div>
+                                        <% } else { %>
+                                          <ul class="list-disc ml-5 space-y-1">
+                                            <% itemTests.forEach(t=> { %>
+                                              <li>
+                                                <button type="button" class="text-blue-600 hover:underline test-btn"
+                                                  data-id="<%= t._id %>" data-title="<%= t.title %>"
+                                                  data-duration="<%= t.durationMinutes %>"
+                                                  data-questions="<%= encodeURIComponent(JSON.stringify(t.questions)) %>">
+                                                  📝 <%= t.title %>
+                                                </button>
+
+                                                <span class="text-xs text-gray-500">
+                                                  (<%= t.questions.length %> questions · <%= t.durationMinutes %> min)
+                                                </span>
+                                              </li>
+
+                                              <% }) %>
+                                          </ul>
+                                          <% } %>
+                                  </div>
+                                  <% } %>
+
+
+                      </div>
+                      <!-- END ITEM -->
+
+                      <% }) %>
+                  </div>
+                </div>
+                <!-- END MODULE -->
+
+                <% }) %>
+            </div>
+
+
+          </div>
+        </div>
+    </div>
+    <!-- Syallbus actions like add lec,assignment,test -->
+    <%- include('../partials/Course-Actions.ejs') %>
+
+      <script>
+        function toggleModule(moduleId) {
+          const body = document.getElementById("module-body-" + moduleId);
+          const icon = document.getElementById("toggle-icon-" + moduleId);
+
+          if (body.classList.contains("hidden")) {
+            body.classList.remove("hidden");
+            icon.innerText = "⬇️";
+          } else {
+            body.classList.add("hidden");
+            icon.innerText = "⬆️";
+          }
+        }
+        function toggleAddItemMenu(moduleId) {
+          const menu = document.getElementById("addItemMenu-" + moduleId);
+          menu.classList.toggle("hidden");
+        }
+        function goBackToCourseManagement() {
+          window.location.href = "/course-management";
+        }
+      </script>
+</body>
+
+</html>

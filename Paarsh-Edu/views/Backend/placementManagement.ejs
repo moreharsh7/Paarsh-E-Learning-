@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Placement Management - Paarsh E-Learning</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-[#f4f6f9]">
+
+    <!-- HEADER -->
+    <%- include('../partials/header.ejs') %>
+
+        <div class="flex">
+
+            <!-- SIDEBAR -->
+            <%- include('../partials/sidebar.ejs') %>
+
+                <!-- MAIN CONTENT -->
+                <main class="flex-1 p-6 space-y-6" id="placementManagementPage">
+
+                   
+                    <!-- Page Header -->
+          <div class="mb-6">
+            <h1 class="text-3xl font-bold text-gray-800">
+              Placement Management
+            </h1>
+            <p class="text-sm text-gray-700 mt-1">
+              Manage companies,Interviews and placements
+            </p>
+          </div>
+                    <!-- PLACEMENT STATS -->
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div class="bg-white p-4 rounded-xl shadow-sm">
+                            <p class="text-sm text-gray-500">Eligible Students</p>
+                            <h3 class="text-2xl font-bold">
+                                <%= stats.totalEligible %>
+                            </h3>
+                        </div>
+
+                        <div class="bg-white p-4 rounded-xl shadow-sm">
+                            <p class="text-sm text-gray-500">Placed</p>
+                            <h3 class="text-2xl font-bold text-green-600">
+                                <%= stats.placedCount %>
+                            </h3>
+                        </div>
+
+                        <div class="bg-white p-4 rounded-xl shadow-sm">
+                            <p class="text-sm text-gray-500">In Process</p>
+                            <h3 class="text-2xl font-bold text-blue-600">
+                                <%= stats.inProcessCount %>
+                            </h3>
+                        </div>
+
+                        <div class="bg-white p-4 rounded-xl shadow-sm">
+                            <p class="text-sm text-gray-500">Closed</p>
+                            <h3 class="text-2xl font-bold text-red-600">
+                                <%= stats.closedCount %>
+                            </h3>
+                        </div>
+                    </div>
+
+                    <!-- PLACEMENT TABLE -->
+                    <div id="placementTableSection">
+                        <div class="bg-white rounded-xl shadow-sm p-4 overflow-x-auto">
+                            <div class="flex justify-between items-center mb-3">
+                                <h5 class="font-semibold text-lg">Placement Candidates</h5>
+
+                                <input
+    id="searchInput"
+    type="text"
+    placeholder="🔍 Search student or course..."
+    class="border rounded px-3 py-1 text-sm w-56 focus:outline-none focus:ring-2 focus:ring-blue-500"
+    oninput="applyPlacementFilters()"
+  />
+
+                                <!-- Future Filters -->
+                                <select
+  id="statusFilter"
+  class="border rounded px-2 py-1 text-sm"
+  onchange="applyPlacementFilters()"
+>
+  <option value="all">All Status</option>
+  <option value="in_process">In Process</option>
+  <option value="placed">Placed</option>
+  <option value="closed">Closed</option>
+</select>
+
+                            </div>
+
+                            <table class="w-full text-sm">
+                                <thead class="border-b text-gray-600">
+                                    <tr>
+                                        <th class="text-left py-2">Student</th>
+                                        <th class="text-left py-2">Course</th>
+                                        <th class="text-left py-2">Calls</th>
+                                        <th class="text-left py-2">Status</th>
+                                        <th class="text-left py-2">Action</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    <% placements.forEach(p=> { %>
+                                        <tr
+  class="border-b placement-row"
+  data-status="<%= p.placementStatus %>"
+  data-student="<%= (p.student?.name || '').toLowerCase() %>"
+  data-course="<%= (p.course?.title || '').toLowerCase() %>"
+>
+
+                                            <td class="py-3">
+                                                <%= p.student?.name || "N/A" %>
+                                            </td>
+                                            <td class="py-3">
+                                                <%= p.course?.title || "N/A" %>
+                                            </td>
+                                            <td class="py-3">
+                                                <%= p.callsUsed %> / <%= p.totalCallsAllowed %>
+                                            </td>
+                                            <td class="py-3">
+                                                <% if (p.placementStatus==="placed" ) { %>
+                                                    Placed
+                                                    <% } else if (p.placementStatus==="closed" ) { %>
+                                                        Closed
+                                                        <% } else if (p.interviewCount> 0) { %>
+                                                            In Process
+                                                            <% } else { %>
+                                                                Not Started
+                                                                <% } %>
+
+                                            </td>
+                                            <td class="py-3">
+                                                <% if (p.placementStatus !=="placed" && p.callsUsed <
+                                                    p.totalCallsAllowed) { %>
+                                                    <button
+                                                        class="text-xs px-3 py-1 border border-blue-600 rounded text-blue-600 hover:bg-blue-600 hover:text-white transition"
+                                                        onclick="openInterviewModal(
+        '<%= p.enrollmentId %>',
+        '<%= p.student._id %>'
+      )">
+                                                        Assign Interview
+                                                    </button>
+                                                    <% } %>
+
+                                                        <button
+  class="text-xs px-3 py-1 border border-gray-600 rounded
+         text-gray-600 hover:bg-gray-600 hover:text-white transition"
+  onclick="showInterviewTable(
+    '<%= p.student._id %>',
+    '<%= p.course._id %>'
+  )">
+  View Interviews
+</button>
+
+                                            </td>
+
+
+                                        </tr>
+                                        <% }) %>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- // interview table -->
+                    <div id="interviewTableSection" class="hidden">
+                        <div class="bg-white rounded-xl shadow-sm p-4 overflow-x-auto mt-6">
+                            <div class="flex justify-between items-center mb-3">
+                                <h5 class="font-semibold text-lg">Interviews</h5>
+
+                                <select class="border rounded px-2 py-1 text-sm">
+                                    <option>All Status</option>
+<option>Scheduled</option>
+<option>Placed</option>
+<option>Not Placed</option>
+<option>Absent</option>
+
+                                </select>
+                                <button onclick="backToPlacements()" class="mb-3 text-sm text-blue-600 hover:underline">
+                                    ← Back to Placement List
+                                </button>
+
+                            </div>
+
+                            <table class="w-full text-sm">
+                                <thead class="border-b text-gray-600">
+                                    <tr>
+                                        <th class="text-left py-2">Student</th>
+                                        <th class="text-left py-2">Company</th>
+                                        <th class="text-left py-2">Interview Date</th>
+                                        <th class="text-left py-2">Status</th>
+                                        <th class="text-left py-2">Action</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    <tr id="noInterviewRow" class="hidden">
+                                        <td colspan="5" class="text-center py-6 text-gray-400">
+                                            No interviews for this enrollment
+                                        </td>
+                                    </tr>
+
+                                    <% interviews.forEach(i=> { %>
+
+                                        <tr class="border-b interview-row" data-student="<%= i.student?._id %>"
+                                            data-course="<%= i.course?._id %>">
+
+                                            <td class="py-3">
+                                                <%= i.student?.name || "N/A" %>
+                                            </td>
+
+                                            <td class="py-3">
+                                                <%= i.company?.name || "N/A" %>
+                                            </td>
+
+                                            <td class="py-3">
+                                                <%= i.scheduledAt ? new Date(i.scheduledAt).toLocaleString("en-IN", {
+                                                    dateStyle: "medium" , timeStyle: "short" }) : "N/A" %>
+                                            </td>
+
+                                            <td class="py-3">
+  <% if (i.status === "placed") { %>
+    <span class="px-3 py-1 rounded-full bg-green-100 text-green-700 text-xs font-semibold">
+      Placed
+    </span>
+
+  <% } else if (i.status === "scheduled" || i.status === "pending_result") { %>
+    <span class="px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-semibold">
+      Scheduled
+    </span>
+
+  <% } else if (i.status === "not_placed") { %>
+    <span class="px-3 py-1 rounded-full bg-red-100 text-red-700 text-xs font-semibold">
+      Not Placed
+    </span>
+
+  <% } else if (i.status === "absent") { %>
+    <span class="px-3 py-1 rounded-full bg-gray-100 text-gray-700 text-xs font-semibold">
+      Absent
+    </span>
+
+  <% } else { %>
+    <span class="px-3 py-1 rounded-full bg-gray-100 text-gray-700 text-xs font-semibold">
+      Unknown
+    </span>
+  <% } %>
+</td>
+
+
+                                            <td class="py-3">
+  <% if (i.status === "scheduled" || i.status === "pending_result") { %>
+    <button
+      class="text-xs px-3 py-1 border border-indigo-600 rounded
+             text-indigo-600 hover:bg-indigo-600 hover:text-white transition"
+      onclick="openResultModal('<%= i._id %>')">
+      Declare Result
+    </button>
+  <% } else { %>
+    <span class="text-xs text-gray-400">No Action</span>
+  <% } %>
+</td>
+
+
+                                        </tr>
+
+                                        <% }) %>
+                                </tbody>
+
+                            </table>
+                        </div>
+                    </div>
+
+
+                </main>
+        </div>
+
+        <%- include('../partials/placement-Actions.ejs') %>
+
+            <script>
+                // ---------------- COMPANY MODAL ----------------
+                function openAddCompanyModal() {
+                    document.getElementById("addCompanyModal").classList.remove("hidden");
+                    document.body.classList.add("overflow-hidden");
+                }
+
+                function closeAddCompanyModal() {
+                    document.getElementById("addCompanyModal").classList.add("hidden");
+                    document.body.classList.remove("overflow-hidden");
+                }
+
+                // ---------------- INTERVIEW MODAL ----------------
+                function openInterviewModal(enrollmentId, studentId) {
+                    if (!enrollmentId) {
+                        alert("Enrollment ID missing. Cannot assign interview.");
+                        return;
+                    }
+
+                    document.getElementById("interviewEnrollmentId").value = enrollmentId;
+                    document.getElementById("interviewStudentId").value = studentId;
+                    document.getElementById("assignInterviewModal").classList.remove("hidden");
+                }
+
+                function closeInterviewModal() {
+                    document.getElementById("assignInterviewModal").classList.add("hidden");
+                    document.body.classList.remove("overflow-hidden");
+                }
+
+                // ---------------- TABLE SWITCHING ----------------
+                let activeEnrollmentId = null;
+
+                function showInterviewTable(studentId, courseId) {
+
+  // switch views
+  document.getElementById("placementTableSection").classList.add("hidden");
+  document.getElementById("interviewTableSection").classList.remove("hidden");
+
+  let hasAny = false;
+
+  document.querySelectorAll(".interview-row").forEach(row => {
+    if (
+      row.dataset.student === studentId &&
+      row.dataset.course === courseId
+    ) {
+      row.style.display = "";
+      hasAny = true;
+    } else {
+      row.style.display = "none";
+    }
+  });
+
+  document
+    .getElementById("noInterviewRow")
+    .classList.toggle("hidden", hasAny);
+}
+
+                function backToPlacements() {
+                    activeEnrollmentId = null;
+
+                    document.getElementById("interviewTableSection").classList.add("hidden");
+                    document.getElementById("placementTableSection").classList.remove("hidden");
+
+                    document.querySelectorAll(".interview-row").forEach(row => {
+                        row.style.display = "";
+                    });
+                }
+
+                //open result MODAL
+                function openResultModal(interviewId) {
+  document.getElementById("resultInterviewId").value = interviewId;
+  document.getElementById("resultStatus").value = "";
+  document.getElementById("companyFeedback").value = "";
+  document.getElementById("adminRemarks").value = "";
+
+  document.getElementById("resultModal").classList.remove("hidden");
+}
+//close 
+function closeResultModal() {
+  document.getElementById("resultModal").classList.add("hidden");
+}
+//submit result
+async function submitResult(event) {
+  event.preventDefault(); 
+
+  const interviewId = document.getElementById("resultInterviewId").value;
+  const status = document.getElementById("resultStatus").value;
+  const companyFeedback = document.getElementById("companyFeedback").value;
+  const adminRemarks = document.getElementById("adminRemarks").value;
+
+  const res = await fetch(
+  `/placement-management/${interviewId}/declare-result`,
+  {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ status, companyFeedback, adminRemarks })
+  }
+);
+
+
+  if (res.ok) {
+    location.reload();
+  } else {
+    alert("Failed to update interview result");
+  }
+}
+
+//filter placement table
+function applyPlacementFilters() {
+    const status =
+      document.getElementById("statusFilter").value;
+
+    const search =
+      document.getElementById("searchInput").value.toLowerCase();
+
+    const rows =
+      document.querySelectorAll(".placement-row");
+
+    rows.forEach(row => {
+      const rowStatus = row.dataset.status;
+      const student = row.dataset.student;
+      const course = row.dataset.course;
+
+      const statusMatch =
+        status === "all" ||
+        rowStatus === status ||
+        (status === "in_process" && rowStatus === "not_started");
+
+      const searchMatch =
+        !search ||
+        student.includes(search) ||
+        course.includes(search);
+
+      row.style.display =
+        statusMatch && searchMatch ? "" : "none";
+    });
+  }
+            </script>
+
+</body>
+
+</html>

@@ -1,0 +1,57 @@
+<!-- TOP NAVBAR -->
+<nav class="bg-white shadow-sm px-6 py-3 flex items-center justify-between">
+
+  <!-- Left -->
+  <div class="flex items-center gap-3">
+    <button class="px-3 py-2 rounded-md border border-gray-300 hover:bg-gray-100" onclick="toggleSidebar()">
+      ☰
+    </button>
+    <div class="flex items-center gap-0">
+      <img src="/images/placeholder.jpg" alt="Paarsh Edu"
+        class="w-10 h-9 object-cover rounded-sm contrast-105 brightness-100" />
+      <img src="/images/Paarsh.jpeg" alt="Paarsh eLearning"
+        class="h-10 w-auto object-contain bg-white px-2 py-1 rounded-sm contrast-125 brightness-230 mt-1" />
+
+    </div>
+  </div>
+
+  <!-- Right -->
+  <div class="flex items-center gap-4">
+    <!-- Notifications -->
+    <div class="relative">
+      <button class="px-3 py-2 rounded-md bg-gray-100 hover:bg-gray-200 relative" onclick="toggleDropdown('notifMenu')">
+        🔔
+        <span class="absolute -top-2 -right-2 bg-red-600 text-white text-xs px-2 py-[1px] rounded-full">
+          2
+        </span>
+      </button>
+
+      <div id="notifMenu" class="hidden absolute right-0 mt-2 w-48 bg-white shadow-md rounded-lg overflow-hidden">
+        <a href="student-management" class="px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer block">
+          New Enrollment
+        </a>
+
+        <a href="enquiries" class="px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer block">
+          New Enquiry
+        </a>
+
+      </div>
+    </div>
+
+    <!-- Admin Dropdown -->
+    <div class="relative">
+      <button class="px-4 py-2 rounded-md border border-gray-300 hover:bg-gray-100 text-sm"
+        onclick="toggleDropdown('adminMenu')">
+        Admin ⌄
+      </button>
+
+      <div id="adminMenu"
+        class="hidden absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-lg border border-gray-100 overflow-hidden z-50">
+        <a href="/auth/logout"
+          class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50 hover:text-red-700 transition">
+          Log out
+        </a>
+      </div>
+
+    </div>
+</nav>

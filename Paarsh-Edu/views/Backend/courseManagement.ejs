@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Management - E-Learning Admin Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+</head>
+
+<body class="bg-[#f4f6f9]">
+
+    <%- include('../partials/header.ejs') %>
+
+        <div class="flex">
+            <%- include('../partials/sidebar.ejs') %>
+
+
+                <!-- COURSE MANAGEMENT CONTENT -->
+                <main class="flex-1 p-6 space-y-6" id="courseManagementPage">
+                    <!-- Page Header -->
+          <div class="mb-6">
+            <h1 class="text-3xl font-bold text-gray-800">
+              Course Management
+            </h1>
+            <p class="text-sm text-gray-700 mt-1">
+              Manage all Your courses and its content
+            </p>
+          </div>
+                    <!-- statas -->
+                    <%- include('../partials/stats.ejs') %>
+                        <!--  CHARTS  -->
+                        
+                            <!-- //featured -->
+                            <%- include('../partials/featuredcourses.ejs') %>
+
+                                <!--  ALL COURSES TABLE  -->
+                                <%- include('../partials/courses-table.ejs') %>
+
+                </main>
+
+                <%- include('../partials/add-course.ejs') %>
+
+                    <!--  ADD CATEGORY PAGE  -->
+                    <%- include('../partials/categoryadd.ejs') %>
+
+
+
+                        <!-- edit -->
+                        <%- include('../partials/updatecourse.ejs') %>
+                            <!-- add syllbus  -->
+                            <%- include('../partials/syllabus-modal.ejs') %>
+                                <script>
+                                    // Chart.js configurations
+
+                                    // syllbus 
+
+                                    // Page navigation functions
+                                    // function showAllCourses() {
+                                    //     document.getElementById('topCourses').classList.add('hidden');
+                                    //     document.getElementById('allCoursesTable').classList.remove('hidden');
+                                    // }
+                                    //open preview
+                                    function previewCourse(courseId) {
+                                        window.location.href = `/admin-course/courses/${courseId}/preview`;
+                                    }
+
+
+                                    // function hideAllCourses() {
+                                    //     document.getElementById('topCourses').classList.remove('hidden');
+                                    //     document.getElementById('allCoursesTable').classList.add('hidden');
+                                    // }
+
+                                    function openAddCourseModal() {
+                                        document.getElementById('addCourseModal').classList.remove('hidden');
+                                        document.body.classList.add('overflow-hidden');
+                                    }
+
+                                    function closeAddCourseModal() {
+                                        document.getElementById('addCourseModal').classList.add('hidden');
+                                        document.body.classList.remove('overflow-hidden');
+                                    }
+
+
+                                    //handle update and syl;labus
+                                    const editCourseId = "<%= editCourseId || '' %>";
+
+                                    if (editCourseId) {
+                                        const course = <%- JSON.stringify(courses) %>.find(
+                                            c => c._id === editCourseId
+                                        );
+
+                                        if (course) {
+                                            openEditCourse(course);
+                                        }
+                                    }
+
+                                    // handle delete
+                                    async function deleteCourse(courseId) {
+                                        const confirmDelete = confirm(
+                                            "Are you sure?\nThis will delete the course and ALL its lectures."
+                                        );
+
+                                        if (!confirmDelete) return;
+
+                                        try {
+                                            const res = await fetch(`/admin-course/courses/delete/${courseId}`, {
+                                                method: "DELETE",
+                                            });
+
+                                            const data = await res.json();
+
+                                            if (data.success) {
+                                                alert("Course deleted successfully");
+                                                location.reload();
+                                            } else {
+                                                alert("Failed to delete course");
+                                            }
+                                        } catch (error) {
+                                            console.error(error);
+                                            alert("Server error while deleting course");
+                                        }
+                                    }
+
+
+                                    // add lectures
+                                    function openLectureManager(courseId, courseTitle) {
+                                        window.location.href = `/admin-course/courses/${courseId}/lectures`;
+                                    }
+
+
+                                    // add category 
+                                    function openAddCategoryModal() {
+                                        document.getElementById('addCategoryModal').classList.remove('hidden');
+                                        document.body.classList.add('overflow-hidden');
+                                    }
+
+                                    function closeAddCategoryModal() {
+                                        document.getElementById('addCategoryModal').classList.add('hidden');
+                                        document.body.classList.remove('overflow-hidden');
+                                    }
+
+                                    // Close dropdowns when clicking outside
+                                    document.addEventListener('click', function (event) {
+                                        if (!event.target.closest('.relative')) {
+                                            document.querySelectorAll('#notifMenu, #adminMenu').forEach(menu => {
+                                                menu.classList.add('hidden');
+                                            });
+                                        }
+                                    });
+                                </script>
+</body>
+
+</html>
