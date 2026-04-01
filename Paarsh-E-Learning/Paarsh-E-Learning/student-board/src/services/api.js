@@ -163,7 +163,7 @@ export const batchEnrollCourses = async (courseIds) => {
 export const getLecturesByCourse = async (courseId) => {
   try {
     const token = localStorage.getItem('token');
-    const response = await fetch(`http://localhost:5000/api/lectures/course/${courseId}`, {
+    const response = await fetch(`https://paarsh-e-learning-p.onrender.com/api/lectures/course/${courseId}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -185,7 +185,7 @@ export const getLecturesByCourse = async (courseId) => {
 export const getLectureById = async (lectureId) => {
   try {
     const token = localStorage.getItem('token');
-    const response = await fetch(`http://localhost:5000/api/lectures/${lectureId}`, {
+    const response = await fetch(`https://paarsh-e-learning-p.onrender.com/api/lectures/${lectureId}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -207,7 +207,7 @@ export const getLectureById = async (lectureId) => {
 export const markLectureAsComplete = async (lectureId) => {
   try {
     const token = localStorage.getItem('token');
-    const response = await fetch(`http://localhost:5000/api/progress/lecture/${lectureId}`, {
+    const response = await fetch(`https://paarsh-e-learning-p.onrender.com/api/progress/lecture/${lectureId}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
