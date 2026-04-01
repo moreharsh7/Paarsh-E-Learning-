@@ -39,6 +39,8 @@ app.use(cors({
   credentials: true
 }));
 app.use(express.json());
+
+app.options('*', cors());
 // serve uploads everything
 app.use('/uploads', express.static(path.resolve('uploads')));
 
