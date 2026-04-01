@@ -1,6 +1,6 @@
 // src/services/api.js
 
-const API_BASE_URL = 'https://your-backend-name.onrender.com/api';
+const API_BASE_URL = 'https://paarsh-e-learning-p.onrender.com/api';
 
 export const getCourses = async (filters = {}) => {
   try {
